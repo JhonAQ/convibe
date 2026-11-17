@@ -5,14 +5,15 @@ import { randomBytes } from "node:crypto";
 import type { Report, ZoneId } from "@/lib/reports";
 
 /**
- * Tiny file-backed store: data/db.json for reports, data/photos/*.jpg for images.
- * Good enough for one building running on one machine.
+ * Tiny file-backed store. Photos are stored inline (compressed data URLs).
+ * - Local: ./data/db.json, survives restarts.
+ * - Vercel: the project dir is read-only, so it lives in /tmp. It survives while
+ *   the function instance stays warm and resets to the seed on a cold start.
  */
-const DIR = path.join(process.cwd(), "data");
+const DIR = process.env.VERCEL ? "/tmp/convibe" : path.join(process.cwd(), "data");
 const DB = path.join(DIR, "db.json");
-export const PHOTOS = path.join(DIR, "photos");
 
-type Row = Omit<Report, "photo"> & { photo: string | null }; // photo = file name
+type Row = Report;
 
 let queue: Promise<unknown> = Promise.resolve();
 /** Serialize read-modify-write so concurrent taps never lose a confirmation. */
@@ -40,7 +41,7 @@ async function write(rows: Row[]) {
 }
 
 function toClient(r: Row): Report {
-  return { ...r, photo: r.photo ? `/api/photos/${r.photo}` : null };
+  return r;
 }
 
 export function newReportId(date = new Date()) {
@@ -69,13 +70,7 @@ export type NewReport = {
 export async function createReport(input: NewReport): Promise<Report> {
   const now = new Date();
   const id = newReportId(now);
-  let photo: string | null = null;
-  if (input.photo?.startsWith("data:image/")) {
-    const b64 = input.photo.split(",")[1] ?? "";
-    await fs.mkdir(PHOTOS, { recursive: true });
-    photo = `${id}.jpg`;
-    await fs.writeFile(path.join(PHOTOS, photo), Buffer.from(b64, "base64"));
-  }
+  const photo = input.photo?.startsWith("data:image/jpeg;base64,") ? input.photo : null;
   const row: Row = {
     id,
     zone: input.zone,

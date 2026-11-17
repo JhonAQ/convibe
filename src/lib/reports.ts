@@ -32,7 +32,7 @@ export type Report = {
   zone: ZoneId;
   title: string;
   description: string;
-  photo: string | null; // URL
+  photo: string | null; // compressed JPEG data URL
   author: { name: string; unit: string };
   authorDevice?: string;
   createdAt: number;
@@ -113,8 +113,8 @@ export async function apiConfirm(id: string, deviceId: string): Promise<Report> 
   return res.json();
 }
 
-/** Resize a photo to max 1000px and JPEG-encode it. */
-export function compressPhoto(file: File, max = 1000): Promise<string> {
+/** Resize a photo to max 900px and JPEG-encode it (~100 KB; Vercel caps bodies at 4.5 MB). */
+export function compressPhoto(file: File, max = 900): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -125,7 +125,7 @@ export function compressPhoto(file: File, max = 1000): Promise<string> {
       c.height = Math.round(img.height * scale);
       c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
-      resolve(c.toDataURL("image/jpeg", 0.78));
+      resolve(c.toDataURL("image/jpeg", 0.72));
     };
     img.onerror = reject;
     img.src = url;

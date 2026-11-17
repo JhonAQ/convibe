@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   if (!ZONES.some((z) => z.id === zone)) return NextResponse.json({ error: "Elige dónde está el daño" }, { status: 400 });
   if (!title) return NextResponse.json({ error: "Cuéntanos qué pasa" }, { status: 400 });
   if (!name || !unit) return NextResponse.json({ error: "Agrega tu nombre y piso" }, { status: 400 });
-  const photo = typeof body.photo === "string" && body.photo.length < 4_000_000 ? body.photo : null;
+  const photo = typeof body.photo === "string" && body.photo.length < 1_500_000 ? body.photo : null;
 
   const report = await createReport({
     zone,
