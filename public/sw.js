@@ -1,4 +1,4 @@
-const CACHE = "reportafacil-v1";
+const CACHE = "convibe-v2";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/"])));
@@ -12,9 +12,10 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-// Network first, fall back to cache so the app opens offline.
+// Network first, fall back to cache so the app shell opens offline. API stays live.
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  if (e.request.method !== "GET" || url.pathname.startsWith("/api/reports")) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

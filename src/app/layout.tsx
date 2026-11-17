@@ -1,25 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import { RegisterSW } from "@/components/register-sw";
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "ReportaFácil",
-  description: "Reporta daños de tu edificio en segundos.",
+  title: "ConVibe",
+  description: "Reporta los daños de tu edificio en segundos.",
   appleWebApp: {
     capable: true,
-    title: "ReportaFácil",
+    title: "ConVibe",
     statusBarStyle: "default",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#dde9f5",
+  themeColor: "#dcebf8",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -30,7 +31,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={jakarta.variable}>
+    <html lang="es" className={outfit.variable}>
       <body className="font-sans">
         {children}
         <RegisterSW />
